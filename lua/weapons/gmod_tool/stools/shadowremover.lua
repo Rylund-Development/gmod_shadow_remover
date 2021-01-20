@@ -38,15 +38,17 @@
 			{ name = "info", stage = 1 },
 			{ name = "left" },
 			{ name = "right" },
-			{ name = "left_reload", icon2 = "gui/r.png"},
-			{ name = "right_reload", icon2 = "gui/r.png"}
+			{ name = "reload"},
+			{ name = "reload_left", icon2 = "gui/lmb.png"},
+			{ name = "reload_right", icon2 = "gui/rmb.png"}
 		}
 
 		language.Add("tool.shadowremover.name", "Shadow Remover")
-		language.Add("tool.shadowremover.left", "Remove shadows on the prop you are looking at")
-		language.Add("tool.shadowremover.right", "Add shadows to the prop you are looking at")
-		language.Add("tool.shadowremover.left_reload", "Make the prop darker" )
-		language.Add("tool.shadowremover.right_reload", "Make the prop brighter" )
+		language.Add("tool.shadowremover.left", "Remove shadows")
+		language.Add("tool.shadowremover.right", "Add shadows")
+		language.Add("tool.shadowremover.reload", "Reset brightness")
+		language.Add("tool.shadowremover.reload_left", "Make the prop darker" )
+		language.Add("tool.shadowremover.reload_right", "Make the prop brighter" )
 		language.Add("tool.shadowremover.desc", "Used to disable map shadows from props, making you able to avoid pitch black props!")
 	end
 
@@ -92,7 +94,9 @@
 --[[-------------------------------------------------------------------------
 		Handle what happens when pressing reload
 ---------------------------------------------------------------------------]]
-	function TOOL:Reload(trace) return false end
+	function TOOL:Reload(trace)
+		trace.ent:SetColor(ent.originalcolor)
+	end
 
 --[[-------------------------------------------------------------------------
 		Serverside functions to handle shadows
