@@ -16,7 +16,7 @@
 	TOOL.Desc = "#tool.shadowremover.desc"
 	TOOL.ConfigName = ""
 
-	TOOL.ClientConVar[ "colorspeed" ] = 10
+	TOOL.ClientConVar[ "valueInterval" ] = 10
 
 --[[-------------------------------------------------------------------------
 		Variables and networking
@@ -105,9 +105,12 @@
 		function shadowremovertool.removepropshadow(ent)
 			shadowremovertool.proplist[ent] = true
 			ent.originalcolor = ent:GetColor()
+			_, _, ent.v = ColorToHSV(ent.originalcolor)
 			net.Start("RemovePropShadow")
 				net.WriteEntity(ent)
 			net.Broadcast()
+
+			return true
 		end
 
 		function shadowremovertool.addpropshadows(ent)
@@ -123,34 +126,23 @@
 
 		function shadowremovertool.makedarker(self, ent)
 			if not shadowremovertool.proplist[ent] then return false end
-			entcolor = ent:GetColor()
-			h, s, v = ColorToHSV(entcolor)
-			if v == 0.1 then return end
-
-			if 0.1 < v - self:GetClientNumber( "colorspeed", 10) / 100  then
-				v = v - self:GetClientNumber( "colorspeed", 10) / 100
-			else
-				v = 0.1
-			end
-
-			colnew = HSVToColor(h, s, v)
-			ent:SetColor(colnew)
+			if ent.v <= 0.1 then return end
+			h, s, _ = ColorToHSV(ent.originalcolor)
+			local newValue = ent.v - self:GetClientNumber('valueInterval', 10) / 100
+			ent.v = 0.1 < newValue and newValue or 0.1
+			ent:SetColor(HSVToColor(h, s, ent.v))
 		end
 
 		function shadowremovertool.makebrighter(self, ent)
 			if not shadowremovertool.proplist[ent] then return false end
-			entcolor = ent:GetColor()
-			h, s, v = ColorToHSV(entcolor)
-			if v == 0.99 then return end
+			h, s, _ = ColorToHSV(ent.originalcolor)
+			if ent.v >= 0.99 then return end
 
-			if 0.99 > self:GetClientNumber( "colorspeed", 10) / 100 + v then
-				v = v + self:GetClientNumber( "colorspeed", 10) / 100
-			else
-				v = 0.99
-			end
+			local newValue = ent.v + self:GetClientNumber('valueInterval', 10) / 100
 
-			colnew = HSVToColor(h, s, v)
-			ent:SetColor(colnew)
+			ent.v = 0.99 > newValue and newValue or 0.99
+
+			ent:SetColor(HSVToColor(h, s, ent.v))
 		end
 
 		function shadowremovertool.loadpropshadowsonjoin(ply)
@@ -170,17 +162,13 @@
 		Build the tool panel
 ---------------------------------------------------------------------------]]
 	function TOOL.BuildCPanel(panel)
-		panel:AddControl("label", {
-			text = "How fast should a prop become darker/brighter in %?"
-		})
+		panel:Help("Darkness interval in %")
 
-		panel:AddControl("Slider", {
-			Label = "Percentage: ",
-			Type = "Float",
-			Min = "1",
-			Max = "100",
-			Command = "shadowremover_colorspeed"
-		})
+		panel:NumSlider("Percentage: ",
+			"shadowremover_valueInterval",
+			"1",
+			"100"
+		)
 	end
 
 --[[-------------------------------------------------------------------------
