@@ -93,6 +93,7 @@ end
 		local entcolor
 
 		function shadowremovertool.removepropshadow(ent)
+			if shadowremovertool.proplist[ent] then return false end
 			shadowremovertool.proplist[ent] = true
 			ent.originalcolor = ent:GetColor()
 			_, _, ent.v = ColorToHSV(ent.originalcolor)
@@ -108,6 +109,7 @@ end
 			shadowremovertool.proplist[ent] = nil
 			ent:SetColor(ent.originalcolor)
 			ent.originalcolor = nil
+			ent.v = nil
 
 			net.Start("AddPropShadow")
 				net.WriteEntity(ent)
