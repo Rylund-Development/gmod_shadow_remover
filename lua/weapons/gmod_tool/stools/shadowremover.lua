@@ -14,6 +14,11 @@ TOOL.ClientConVar[ "valueInterval" ] = 10
 shadowremovertool = {}
 shadowremovertool.proplist = shadowremovertool.proplist or {}
 
+local allowedTypes = {
+	['prop_physics'] = true,
+	['prop_ragdoll'] = true
+}
+
 if SERVER then
 	util.AddNetworkString("RemovePropShadow")
 	util.AddNetworkString("AddPropShadow")
@@ -46,7 +51,7 @@ end
 -----------------------------------------------------------------------------
 	function TOOL:LeftClick(trace)
 		local ent = trace.Entity
-		if not IsEntity(ent) or ent:GetClass() ~= "prop_physics" and ent:GetClass() ~= "prop_ragdoll" then return false end
+		if not IsEntity(ent) or not allowedTypes[ent:GetClass()] then return false end
 		if CLIENT then return true end
 
 		if not self:GetOwner():KeyDown(IN_USE) then
@@ -62,7 +67,7 @@ end
 -----------------------------------------------------------------------------
 	function TOOL:RightClick(trace)
 		local ent = trace.Entity
-		if not IsEntity(ent) or ent:GetClass() ~= "prop_physics" and ent:GetClass() ~= "prop_ragdoll" then return false end
+		if not IsEntity(ent) or not allowedTypes[ent:GetClass()] then return false end
 		if CLIENT then return true end
 
 		if not self:GetOwner():KeyDown(IN_USE) then
